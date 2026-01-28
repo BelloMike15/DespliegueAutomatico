@@ -17,6 +17,20 @@ pipeline {
       }
     }
 
+    stage('Cleanup Old Containers') {
+      steps {
+        sh '''
+          # Detener contenedores que usan el puerto 3000 o 8080
+          docker ps -q --filter "publish=3000" | xargs -r docker stop || true
+          docker ps -q --filter "publish=8080" | xargs -r docker stop || true
+
+          # Eliminar contenedores viejos del proyecto
+          docker compose down --remove-orphans || true
+          docker ps -a --filter "name=tiendamiketech" -q | xargs -r docker rm -f || true
+        '''
+      }
+    }
+
     stage('Check Docker & Compose') {
       steps {
         sh '''
