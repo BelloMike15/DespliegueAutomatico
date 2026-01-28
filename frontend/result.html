@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resultado de pago | Tienda MikeTech S.A</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{ color-scheme: dark; }
+    body{ margin:0; font-family:Inter,system-ui; background:#0b1220; color:#fff; }
+    .wrap{ max-width:920px; margin:0 auto; padding:24px; }
+    .card{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:18px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.25);
+    }
+    .title{ font-size:22px; font-weight:800; margin:0 0 6px; }
+    .muted{ color:rgba(255,255,255,.72); }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 14px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.08);
+      color:#fff; text-decoration:none; cursor:pointer; font-weight:700;
+    }
+    .btn:hover{ background:rgba(255,255,255,.12); }
+    .ok{ border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12); }
+    .bad{ border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.12); }
+    pre{
+      white-space:pre-wrap;
+      word-break:break-word;
+      background:rgba(0,0,0,.25);
+      padding:12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.10);
+      margin: 0;
+    }
+    .hint{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px dashed rgba(255,255,255,.18);
+      background: rgba(255,255,255,.05);
+      color: rgba(255,255,255,.75);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card" id="box">
+      <h1 class="title" id="title">Procesando tu pago…</h1>
+      <p class="muted" id="msg">Estamos verificando la transacción con PayPhone.</p>
+
+      <div class="row">
+        <a class="btn" href="index.html">Volver a la tienda</a>
+        <button class="btn" id="retryBtn" type="button">Reintentar confirmación</button>
+      </div>
+
+      <div class="hint" id="hint" style="display:none;"></div>
+
+      <div style="margin-top:14px;">
+        <div class="muted" style="margin-bottom:8px;">Detalles:</div>
+        <pre id="details">Cargando…</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+
+    // PayPhone normalmente manda id y clientTransactionId en la URL
+    // (por si acaso leemos algunas variaciones)
+    const id =
+      params.get("id") ||
+      params.get("transactionId") ||
+      params.get("transactionid") ||
+      "";
+
+    const clientTransactionId =
+      params.get("clientTransactionId") ||
+      params.get("clienttransactionid") ||
+      params.get("clientTxId") || // algunas integraciones lo nombran así
+      "";
+
+    const status =
+      params.get("status") ||
+      params.get("Status") ||
+      "";
+
+    const box = document.getElementById("box");
+    const titleEl = document.getElementById("title");
+    const msg = document.getElementById("msg");
+    const details = document.getElementById("details");
+    const retryBtn = document.getElementById("retryBtn");
+    const hint = document.getElementById("hint");
+
+    function setState(type, title, text){
+      box.classList.remove("ok","bad");
+      if (type) box.classList.add(type);
+      titleEl.textContent = title;
+      msg.textContent = text;
+    }
+
+    async function safeJsonOrText(resp){
+      const raw = await resp.text();
+      try { return JSON.parse(raw); } catch { return { raw }; }
+    }
+
+    function showHint(html){
+      hint.style.display = "block";
+      hint.innerHTML = html;
+    }
+
+    async function confirm(){
+      details.textContent = JSON.stringify(
+        { id, clientTransactionId, status, receivedParams: Object.fromEntries(params.entries()) },
+        null,
+        2
+      );
+
+      // Si el usuario llegó manualmente o ngrok mostró warning, no habrá query params
+      if (!id || !clientTransactionId){
+        setState(
+          "bad",
+          "Faltan parámetros",
+          "No llegaron id/clientTransactionId desde PayPhone. Esto pasa si entraste manualmente o si el navegador mostró la pantalla de advertencia de ngrok."
+        );
+
+        showHint(`
+          <b>Qué hacer:</b><br>
+          1) Abre primero la tienda desde ngrok y presiona <b>Visit Site</b> una vez.<br>
+          2) Luego vuelve a intentar el pago desde la tienda.<br>
+          3) La redirección correcta debe verse así: <br>
+          <code>.../result.html?id=...&clientTransactionId=...</code>
+        `);
+        return;
+      }
+
+      setState("", "Procesando tu pago…", "Confirmando transacción con el servidor…");
+      hint.style.display = "none";
+
+      try{
+        // ✅ IMPORTANTE: usar SIEMPRE ruta relativa.
+        // Nginx debe proxyear /api/ hacia tu contenedor api (evita CORS y problemas con ngrok)
+        const url = `/api/payphone/confirm?id=${encodeURIComponent(id)}&clientTransactionId=${encodeURIComponent(clientTransactionId)}`;
+        const r = await fetch(url, { method: "GET" });
+
+        const data = await safeJsonOrText(r);
+        details.textContent = JSON.stringify({ httpStatus: r.status, data }, null, 2);
+
+        if (!r.ok){
+          setState("bad", "No se pudo confirmar", "La confirmación falló. Puedes reintentar.");
+          showHint(`
+            <b>Tips rápidos:</b><br>
+            • Verifica que el backend corrigió el Confirm (clientTxId).<br>
+            • Revisa que el token y storeId sean correctos y estén activos.<br>
+            • Asegúrate que en PayPhone Developer el dominio autorizado sea el de ngrok.
+          `);
+          return;
+        }
+
+        setState(
+          "ok",
+          "Pago confirmado ✅",
+          `Tu transacción fue confirmada correctamente${status ? ` (estado: ${status})` : ""}. ¡Gracias por comprar en Tienda MikeTech S.A!`
+        );
+      }catch(err){
+        details.textContent = String(err);
+        setState("bad", "Error de red", "No se pudo contactar al servidor. Revisa que docker compose esté levantado.");
+        showHint(`Si estás usando ngrok, NO uses localhost en el frontend. Todo debe ir por <b>/api/...</b> con proxy Nginx.`);
+      }
+    }
+
+    retryBtn.addEventListener("click", confirm);
+    confirm();
+  </script>
+</body>
+</html>

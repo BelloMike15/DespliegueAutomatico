@@ -1,0 +1,17 @@
+# env
+**/.env
+.env
+
+# node
+**/node_modules
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# logs
+**/*.log
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/

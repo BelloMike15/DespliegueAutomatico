@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tienda MikeTech S.A</title>
+  <meta name="description" content="Tienda MikeTech S.A - Tecnología con estilo. Compra rápido y paga con PayPhone." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <div class="brand">
+        <div class="brand__logo" aria-hidden="true">M</div>
+        <div class="brand__text">
+          <div class="brand__name">Tienda MikeTech S.A</div>
+          <div class="brand__tag">Tecnología • Garantía • Envíos</div>
+        </div>
+      </div>
+
+      <button class="cartBtn" id="openCart" type="button" aria-label="Abrir carrito">
+        <span class="cartBtn__icon" aria-hidden="true">🛒</span>
+        <span class="cartBtn__text">Carrito</span>
+        <span class="cartBtn__badge" id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero__content">
+        <h1>Compra tecnología sin complicarte.</h1>
+        <p>Productos seleccionados, precios claros y pago seguro con PayPhone. ✨</p>
+        <div class="hero__ctaRow">
+          <a class="btn btn--primary" href="#productos">Ver productos</a>
+          <a class="btn btn--ghost" href="result.html">Ver resultado de pago</a>
+        </div>
+      </div>
+      <div class="hero__card" aria-hidden="true">
+        <div class="hero__metric">
+          <div class="hero__metricTitle">Pago seguro</div>
+          <div class="hero__metricValue">PayPhone</div>
+        </div>
+        <div class="hero__metric">
+          <div class="hero__metricTitle">IVA</div>
+          <div class="hero__metricValue">12%</div>
+        </div>
+        <div class="hero__metric">
+          <div class="hero__metricTitle">Moneda</div>
+          <div class="hero__metricValue">USD</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="productos" class="section">
+      <div class="section__head">
+        <h2>Productos</h2>
+        <div class="search">
+          <input id="searchInput" type="search" placeholder="Buscar producto..." autocomplete="off" />
+        </div>
+      </div>
+
+      <div id="productGrid" class="grid" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <!-- Drawer del carrito -->
+  <div class="drawerBackdrop" id="drawerBackdrop" hidden></div>
+
+  <aside class="drawer" id="drawer" aria-label="Carrito" aria-hidden="true">
+    <div class="drawer__head">
+      <div>
+        <div class="drawer__title">Tu carrito</div>
+        <div class="drawer__subtitle" id="cartSubtitle">0 artículos</div>
+      </div>
+      <button class="iconBtn" id="closeCart" type="button" aria-label="Cerrar carrito">✕</button>
+    </div>
+
+    <div class="drawer__body">
+      <div id="cartList" class="cartList"></div>
+
+      <div class="summary">
+        <div class="row"><span>Subtotal</span><strong id="subtotal">$0.00</strong></div>
+        <div class="row"><span>IVA (12%)</span><strong id="iva">$0.00</strong></div>
+        <div class="row row--total"><span>Total</span><strong id="total">$0.00</strong></div>
+      </div>
+
+      <div class="drawer__actions">
+        <button class="btn btn--ghost btn--full" id="clearCart" type="button">Vaciar carrito</button>
+        <button class="btn btn--primary btn--full" id="payButton" type="button">Pagar con PayPhone</button>
+        <div class="hint">
+          Al pagar, se abrirá una nueva pestaña con el formulario de PayPhone (recomendado por seguridad).
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <span>© <span id="year"></span> Tienda MikeTech S.A</span>
+      <span class="footer__sep">•</span>
+      <span>Hecho con ❤ para prácticas de Docker/Jenkins</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
