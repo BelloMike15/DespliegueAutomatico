@@ -115,7 +115,7 @@ function clearCart(){
   cart = [];
   updateCartUI();
 }
-
+//hola
 function totals(){
   const subtotal = cart.reduce((s, it) => s + (it.price * it.qty), 0);
   const iva = subtotal * IVA_RATE;
