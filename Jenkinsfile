@@ -16,6 +16,30 @@ pipeline {
       }
     }
 
+    stage('Show Changes') {
+      steps {
+        sh '''
+          echo "=========================================="
+          echo "         INFORMACIÓN DEL COMMIT          "
+          echo "=========================================="
+          echo ""
+          echo "Último commit:"
+          git log -1 --pretty=format:"Autor: %an%nFecha: %ad%nMensaje: %s" --date=local
+          echo ""
+          echo ""
+          echo "=========================================="
+          echo "         ARCHIVOS MODIFICADOS            "
+          echo "=========================================="
+          git diff-tree --no-commit-id --name-status -r HEAD
+          echo ""
+          echo "=========================================="
+          echo "         DETALLE DE LOS CAMBIOS          "
+          echo "=========================================="
+          git show --stat HEAD
+        '''
+      }
+    }
+
     stage('Cleanup Old Containers') {
       steps {
         sh '''
