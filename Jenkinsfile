@@ -3,6 +3,7 @@ pipeline {
 
   // Trigger automático cuando se hace push a GitHub
   // Pipeline3 - despliegue automático
+  // Victor Delgado Meza
   triggers {
     githubPush()
   }
