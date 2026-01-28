@@ -3,6 +3,7 @@ pipeline {
 
   // Trigger automático cuando se hace push a GitHub
   // Test webhook - trigger automático
+  //prueba dos - trigger automático
   triggers {
     githubPush()
   }
