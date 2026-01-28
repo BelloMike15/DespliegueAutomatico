@@ -19,6 +19,18 @@ pipeline {
       }
     }
 
+    stage('Prepare env') {
+      steps {
+        sh '''
+          mkdir -p api
+          cat <<EOF > api/.env
+PORT=3000
+NODE_ENV=production
+EOF
+        '''
+      }
+    }
+
     stage('Build (Compose)') {
       steps {
         sh 'docker compose build'
@@ -45,7 +57,7 @@ pipeline {
   post {
     always {
       echo "Build finalizado con resultado: ${currentBuild.currentResult}"
-      sh 'docker ps'
+      sh 'docker ps || true'
     }
     failure {
       echo "Falló el pipeline. Revisa Docker/Compose o el health endpoint."
