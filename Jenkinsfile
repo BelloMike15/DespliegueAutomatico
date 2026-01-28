@@ -1,9 +1,7 @@
 pipeline {
   agent any
 
-  triggers {
-    githubPush()
-  }
+  triggers { githubPush() }
 
   stages {
     stage('Checkout') {
@@ -12,27 +10,27 @@ pipeline {
 
     stage('Build') {
       steps {
-        sh 'docker compose build'
+        bat 'docker compose build'
       }
     }
 
-    stage('Deploy (Up)') {
+    stage('Deploy') {
       steps {
-        sh 'docker compose up -d --build'
+        bat 'docker compose up -d --build'
       }
     }
 
     stage('Smoke Test') {
       steps {
-        sh 'sleep 5'
-        sh 'curl -f http://localhost:3000/api/health'
+        bat 'timeout /t 5 /nobreak'
+        bat 'curl -f http://localhost:3000/api/health'
       }
     }
   }
 
   post {
     always {
-      sh 'docker ps'
+      bat 'docker ps'
     }
   }
 }
