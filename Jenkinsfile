@@ -10,27 +10,27 @@ pipeline {
 
     stage('Build') {
       steps {
-        bat 'docker compose build'
+        sh 'docker compose build'
       }
     }
 
     stage('Deploy') {
       steps {
-        bat 'docker compose up -d --build'
+        sh 'docker compose up -d --build'
       }
     }
 
     stage('Smoke Test') {
       steps {
-        bat 'timeout /t 5 /nobreak'
-        bat 'curl -f http://localhost:3000/api/health'
+        sh 'sleep 5'
+        sh 'curl -f http://localhost:3000/api/health'
       }
     }
   }
 
   post {
     always {
-      bat 'docker ps'
+      sh 'docker ps'
     }
   }
 }
