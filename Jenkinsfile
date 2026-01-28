@@ -1,6 +1,11 @@
 pipeline {
   agent any
 
+  // Trigger automático cuando se hace push a GitHub
+  triggers {
+    githubPush()
+  }
+
   stages {
 
     stage('Checkout') {
