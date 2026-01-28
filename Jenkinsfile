@@ -44,13 +44,15 @@ EOF
     }
 
     stage('Smoke Test') {
-      steps {
-        sh '''
-          sleep 5
-          curl -f http://localhost:3000/api/health
-        '''
-      }
-    }
+  steps {
+    sh '''
+      sleep 5
+      docker exec tiendamiketech-pipeline3-api-1 \
+        curl -f http://localhost:3000/api/health
+    '''
+  }
+}
+
 
   }
 
