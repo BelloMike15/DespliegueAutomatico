@@ -6,6 +6,7 @@ pipeline {
   // Victor Delgado Meza
   //EN CLASES PRUEBA----
   //Mike  Bello Alonzo prueba 2
+  //hola como estas
   triggers {
     githubPush()
   }
