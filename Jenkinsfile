@@ -1,6 +1,5 @@
 pipeline {
   agent any
-
   triggers { githubPush() }
 
   stages {
@@ -10,13 +9,13 @@ pipeline {
 
     stage('Build') {
       steps {
-        sh 'docker compose build'
+        sh 'docker-compose build'
       }
     }
 
     stage('Deploy') {
       steps {
-        sh 'docker compose up -d --build'
+        sh 'docker-compose up -d --build'
       }
     }
 
