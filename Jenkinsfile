@@ -2,6 +2,7 @@ pipeline {
   agent any
 
   // Trigger automático cuando se hace push a GitHub
+  // Test webhook - trigger automático
   triggers {
     githubPush()
   }
