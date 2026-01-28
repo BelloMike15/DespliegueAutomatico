@@ -20,13 +20,18 @@ pipeline {
     stage('Cleanup Old Containers') {
       steps {
         sh '''
-          # Detener contenedores que usan el puerto 3000 o 8080
-          docker ps -q --filter "publish=3000" | xargs -r docker stop || true
-          docker ps -q --filter "publish=8080" | xargs -r docker stop || true
+          # Detener y eliminar TODOS los contenedores que usan puertos 3000 y 8080
+          docker ps -q --filter "publish=3000" | xargs -r docker rm -f || true
+          docker ps -q --filter "publish=8080" | xargs -r docker rm -f || true
 
-          # Eliminar contenedores viejos del proyecto
-          docker compose down --remove-orphans || true
+          # Limpiar todos los proyectos tiendamiketech (cualquier variante)
           docker ps -a --filter "name=tiendamiketech" -q | xargs -r docker rm -f || true
+
+          # Limpiar compose actual
+          docker compose down --remove-orphans || true
+
+          # Esperar un momento para que los puertos se liberen
+          sleep 2
         '''
       }
     }
