@@ -90,33 +90,23 @@ EOF
     }
 
     stage('Smoke Test') {
-      steps {
-        sh '''
-          echo "⏳ Esperando que WEB responda (http://localhost:8080/)..."
-          for i in 1 2 3 4 5 6 7 8 9 10; do
-            if curl -fsS http://localhost:8080/ > /dev/null; then
-              echo "✅ WEB OK"
-              break
-            fi
-            echo "⏳ WEB aún no responde... intento $i/10"
-            sleep 2
-          done
+  steps {
+    sh '''
+      echo "📄 Verificando index.html..."
+      docker exec tiendamiketech-pipeline3-web-1 ls -la /usr/share/nginx/html
 
-          # Validación final web (si aún no responde, falla aquí)
-          curl -fsS http://localhost:8080/ > /dev/null
+      echo "🌐 Probando WEB..."
+      curl -fsS http://localhost:8080/
 
-          echo "⏳ Probando API (http://localhost:3000/api/health)..."
-          curl -fsS http://localhost:3000/api/health > /dev/null
-          echo "✅ API OK"
+      echo "🔌 Probando API..."
+      curl -fsS http://localhost:3000/api/health
 
-          echo "=============================================="
-          echo "✅ OK: Despliegue correcto"
-          echo "🌐 TIENDA (index.html): http://localhost:8080/"
-          echo "🔧 API Health:          http://localhost:3000/api/health"
-          echo "=============================================="
-        '''
-      }
-    }
+      echo "✅ WEB y API OK"
+      echo "👉 Abre en tu navegador: http://localhost:8080/"
+    '''
+  }
+}
+
   }
 
   post {
