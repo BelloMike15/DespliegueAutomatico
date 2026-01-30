@@ -100,11 +100,18 @@ EOF
   steps {
     sh '''
       sleep 5
-      docker exec tiendamiketech-pipeline3-api-1 \
-        curl -f http://localhost:8080/
+      echo "✅ Probando WEB desde contenedor web..."
+      docker exec tiendamiketech-pipeline3-web-1 wget -qO- http://localhost/ > /dev/null
+
+      echo "✅ Probando API desde contenedor api..."
+      docker exec tiendamiketech-pipeline3-api-1 curl -f http://localhost:3000/api/health
+
+      echo "✅ OK: API y WEB responden"
+      echo "🌐 Abre tu tienda aquí: http://localhost:8080/"
     '''
   }
 }
+
 
 
   }
