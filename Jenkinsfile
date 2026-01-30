@@ -103,7 +103,12 @@ EOF
 
       echo "✅ WEB y API OK"
       echo "👉 Abre en tu navegador: http://localhost:8080/"
+
+      echo "📌 Mostrando config Nginx..."
+docker exec tiendamiketech-pipeline3-web-1 nginx -T | sed -n '1,200p'
+
     '''
+  
   }
 }
 
