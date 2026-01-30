@@ -101,7 +101,7 @@ EOF
     sh '''
       sleep 5
       docker exec tiendamiketech-pipeline3-api-1 \
-        curl -f http://localhost:3000/api/health
+        curl -f http://localhost:8080/
     '''
   }
 }
