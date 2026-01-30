@@ -1,12 +1,6 @@
 pipeline {
   agent any
 
-  // Trigger automático cuando se hace push a GitHub
-  // Pipeline3 - despliegue automático
-  // Victor Delgado Meza
-  //EN CLASES PRUEBA----
-  //Mike  Bello Alonzo prueba 2
-  //hola como estas
   triggers {
     githubPush()
   }
@@ -47,17 +41,16 @@ pipeline {
     stage('Cleanup Old Containers') {
       steps {
         sh '''
-          # Detener y eliminar TODOS los contenedores que usan puertos 3000 y 8080
+          # Detener y eliminar contenedores que usan puertos 3000 y 8080
           docker ps -q --filter "publish=3000" | xargs -r docker rm -f || true
           docker ps -q --filter "publish=8080" | xargs -r docker rm -f || true
 
-          # Limpiar todos los proyectos tiendamiketech (cualquier variante)
+          # Limpiar todos los contenedores que tengan tiendamiketech en el nombre
           docker ps -a --filter "name=tiendamiketech" -q | xargs -r docker rm -f || true
 
-          # Limpiar compose actual
+          # Bajar compose actual si existe
           docker compose down --remove-orphans || true
 
-          # Esperar un momento para que los puertos se liberen
           sleep 2
         '''
       }
@@ -97,23 +90,33 @@ EOF
     }
 
     stage('Smoke Test') {
-  steps {
-    sh '''
-      sleep 5
-      echo "✅ Probando WEB desde contenedor web..."
-      docker exec tiendamiketech-pipeline3-web-1 wget -qO- http://localhost/ > /dev/null
+      steps {
+        sh '''
+          echo "⏳ Esperando que WEB responda (http://localhost:8080/)..."
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if curl -fsS http://localhost:8080/ > /dev/null; then
+              echo "✅ WEB OK"
+              break
+            fi
+            echo "⏳ WEB aún no responde... intento $i/10"
+            sleep 2
+          done
 
-      echo "✅ Probando API desde contenedor api..."
-      docker exec tiendamiketech-pipeline3-api-1 curl -f http://localhost:3000/api/health
+          # Validación final web (si aún no responde, falla aquí)
+          curl -fsS http://localhost:8080/ > /dev/null
 
-      echo "✅ OK: API y WEB responden"
-      echo "🌐 Abre tu tienda aquí: http://localhost:8080/"
-    '''
-  }
-}
+          echo "⏳ Probando API (http://localhost:3000/api/health)..."
+          curl -fsS http://localhost:3000/api/health > /dev/null
+          echo "✅ API OK"
 
-
-
+          echo "=============================================="
+          echo "✅ OK: Despliegue correcto"
+          echo "🌐 TIENDA (index.html): http://localhost:8080/"
+          echo "🔧 API Health:          http://localhost:3000/api/health"
+          echo "=============================================="
+        '''
+      }
+    }
   }
 
   post {
@@ -121,8 +124,12 @@ EOF
       echo "Build finalizado con resultado: ${currentBuild.currentResult}"
       sh 'docker ps || true'
     }
+    success {
+      echo "✅ BUILD SUCCESS"
+      echo "🌐 Abre tu tienda aquí: http://localhost:8080/"
+    }
     failure {
-      echo "Falló el pipeline. Revisa Docker/Compose o el health endpoint."
+      echo "❌ Falló el pipeline. Revisa Docker/Compose o los endpoints."
     }
   }
 }
