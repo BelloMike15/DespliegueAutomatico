@@ -101,11 +101,11 @@ EOF
     sh '''
       sleep 5
       docker exec tiendamiketech-pipeline3-api-1 \
-        curl -f http://localhost:3000/frontend/index.html
+        curl -f http://localhost:3000/api/health
     '''
   }
 }
-//mike
+
 
   }
 
